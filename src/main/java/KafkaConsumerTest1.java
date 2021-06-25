@@ -8,6 +8,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -28,11 +29,14 @@ public class KafkaConsumerTest1 {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         //订阅topic  通过指定消费分区 ，失去组管理特性
 //        consumer.subscribe(Pattern.compile("^topic.*"));
-        consumer.assign(Arrays.asList(new TopicPartition("topic01",0)));
+        List<TopicPartition> partitions = Arrays.asList(new TopicPartition("topic01", 0));
+        consumer.assign(partitions);
 
         //指定消费分区的位置
+//        consumer.seekToBeginning(partitions);
 
         //设置消费分区指定位置
+        consumer.seek(new TopicPartition("topic01", 0),0);
 
         //遍历消息队列
         while (true) {

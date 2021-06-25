@@ -10,7 +10,7 @@ import java.util.Properties;
  * @Date: 2021/6/24
  * @Description:
  */
-public class KafkaProducerTest {
+public class KafkaProducerPartitionTest {
 
     public static void main(String[] args) {
 
