@@ -1,3 +1,5 @@
+package common;
+
 import org.apache.kafka.clients.admin.*;
 
 import java.util.Arrays;
@@ -21,22 +23,22 @@ public class KafkaTopicDML {
         KafkaAdminClient adminClient = (KafkaAdminClient) KafkaAdminClient.create(props);
 
         //创建Topic
-        /*CreateTopicsResult createTopics = adminClient.createTopics(Arrays.asList(new NewTopic("topic02", 2, (short) 1)));
-        createTopics.all().get();*/  //同步创建
+        CreateTopicsResult createTopics = adminClient.createTopics(Arrays.asList(new NewTopic("topic02", 1, (short) 1)));
+        createTopics.all().get();  //同步创建
 
         //查看Topic列表
-        ListTopicsResult topicsResult = adminClient.listTopics();
+        /*ListTopicsResult topicsResult = adminClient.listTopics();
         Set<String> set = topicsResult.names().get();
         for (String str : set) {
             System.out.println(str);
-        }
+        }*/
 
         //删除Topic
-        /*DeleteTopicsResult deleteTopics = adminClient.deleteTopics(Arrays.asList("topic02"));
+        /*DeleteTopicsResult deleteTopics = adminClient.deleteTopics(Arrays.asList("topic03"));
         deleteTopics.all().get(); */  //同步删除
 
         //Topic详情
-       /* DescribeTopicsResult describeTopics = adminClient.describeTopics(Arrays.asList("topic01","topic02"));
+       /* DescribeTopicsResult describeTopics = adminClient.describeTopics(Arrays.asList("topic03","topic02"));
         Map<String, TopicDescription> descriptionMap = describeTopics.all().get();
         for (Map.Entry<String, TopicDescription> entry : descriptionMap.entrySet()) {
             System.out.println(entry.getKey() + "\t" + entry.getValue());

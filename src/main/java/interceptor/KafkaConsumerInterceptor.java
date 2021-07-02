@@ -1,20 +1,24 @@
+package interceptor;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 /**
  * @Author: devilhan
  * @Date: 2021/6/24
  * @Description:
  */
-public class KafkaConsumerTest {
+public class KafkaConsumerInterceptor {
     public static void main(String[] args) {
         //创建KafkaConsumer
         Properties props = new Properties();
@@ -24,8 +28,18 @@ public class KafkaConsumerTest {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "group1");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        //订阅topic
-        consumer.subscribe(Pattern.compile("^topic.*"));
+        consumer.subscribe(Arrays.asList("topic03"));
+        //订阅topic  通过指定消费分区 ，失去组管理特性
+//        consumer.subscribe(Pattern.compile("^topic.*"));
+//        List<TopicPartition> partitions = Arrays.asList(new TopicPartition("topic02", 0));
+//        consumer.assign(partitions);
+
+        //指定消费分区的位置
+//        consumer.seekToBeginning(partitions);
+
+        //设置消费分区指定位置
+//        consumer.seek(new TopicPartition("topic01", 0),0);
+
         //遍历消息队列
         while (true) {
             ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));

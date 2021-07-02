@@ -1,8 +1,11 @@
+package serializer;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -10,7 +13,7 @@ import java.util.Properties;
  * @Date: 2021/6/24
  * @Description:
  */
-public class KafkaProducerTest {
+public class KafkaProducerUser {
 
     public static void main(String[] args) {
 
@@ -18,16 +21,16 @@ public class KafkaProducerTest {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"tcandyj.top:9092");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, UserDefineSerializer.class.getName());
 
-        KafkaProducer<String, String> producer = new KafkaProducer<>(props);
+        KafkaProducer<String, User> producer = new KafkaProducer<>(props);
 
         for (int i=0;i<10;i++){
             /*
                 producer 如果有key : 将采用 hash 方式
                          如果没key : 将采用 轮询 方式
              */
-            ProducerRecord<String, String> record = new ProducerRecord<>("topic01", "key" + i, "value" + i);
+            ProducerRecord<String, User> record = new ProducerRecord<String, User>("topic02", "key" + i, new User(i,"user"+i,new Date()));
             //发送给服务器
             producer.send(record);
         }
