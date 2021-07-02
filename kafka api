@@ -1,0 +1,16 @@
+      Kafka消费者默认对于未订阅的topic的offset的时候，也就是系统并没有存储该消费者的消费分区的记录信息
+      默认Kafka消费者的默认首次消费策略：latest
+
+      auto.offset.reset=latest
+
+      earliest - 自动将偏移量重置为最早的偏移量
+      latest - 自动将偏移量重置为最新的偏移量
+      none - 如果未找到消费者组的先前偏移量，则向消费者抛出异常
+      
+      Kafka消费者在消费数据的时候默认会定期的提交消费的偏移量，这样就可以保证所有的消息至少可以被消费者消费1次,用户可以通过以下两个参数配置：
+
+      enable.auto.commit = true  默认
+      auto.commit.interval.ms = 5000 默认
+
+      如果用户需要自己管理offset的自动提交，可以关闭offset的自动提交，手动管理offset提交的偏移量，
+      注意用户提交的offset偏移量永远都要比本次消费的偏移量+1，因为提交的offset是kafka消费者下一次抓取数据的位置。
