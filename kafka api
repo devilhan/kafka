@@ -38,4 +38,28 @@
 
       记录下已处理过的请求标识：光有唯一标识还不够，还需要记录下那些请求是已经处理过的，这样当收到新的请求时，用新请求中的标识和处理记录进行比较，
       如果处理记录中有相同的标识，说明是重复记录，拒绝掉。
+      
+      幂等又称为exactly once。要停止多次处理消息，必须仅将其持久化到Kafka Topic中仅仅一次。
+      在初始化期间，kafka会给生产者生成一个唯一的ID称为Producer ID或PID。
+
+      PID和序列号与消息捆绑在一起，然后发送给Broker。由于序列号从零开始并且单调递增，因此，仅当消息的序列号比该PID / TopicPartition对中最后提交的消息正好大1时，Broker才会接受该消息。
+      如果不是这种情况，则Broker认定是生产者重新发送该消息。
+
+      enable.idempotence= false 默认
+
+      注意:在使用幂等性的时候，要求必须开启retries=true和acks=all
+      
+      Kafka的幂等性，只能保证一条记录的在分区发送的原子性，但是如果要保证多条记录（多分区）之间的完整性，这个时候就需要开启kafk的事务操作。
+
+      在Kafka0.11.0.0除了引入的幂等性的概念，同时也引入了事务的概念。
+      通常Kafka的事务分为 生产者事务Only、消费者&生产者事务。
+      一般来说默认消费者消费的消息的级别是read_uncommited数据，这有可能读取到事务失败的数据，所有在开启生产者事务之后，需要用户设置消费者的事务隔离级别。
+
+      isolation.level	=  read_uncommitted 默认
+
+      该选项有两个值read_committed|read_uncommitted，如果开始事务控制，消费端必须将事务的隔离级别设置为read_committed
+
+      开启的生产者事务的时候，只需要指定transactional.id属性即可，一旦开启了事务，默认生产者就已经开启了幂等性。
+      但是要求"transactional.id"的取值必须是唯一的，同一时刻只能有一个"transactional.id"存储在，其他的将会被关闭。
+
 
