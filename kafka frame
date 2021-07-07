@@ -1,0 +1,34 @@
+    Kafka的Topic被分为多个分区，分区是是按照Segments存储文件块。
+    分区日志是存储在磁盘上的日志序列，Kafka可以保证分区里的事件是有序的。
+    其中Leader负责对应分区的读写、Follower负责同步分区的数据，0.11 版本之前Kafka使用highwatermarker机制保证数据的同步，
+    但是基于highwatermarker的同步数据可能会导致数据的不一致或者是乱序。
+    
+    在Kafka数据同步有以下概念:
+
+      LEO：log end offset 标识的是每个分区中最后一条消息的下一个位置，分区的每个副本都有自己的LEO.
+
+      HW: high watermarker称为高水位线，所有HW之前的的数据都理解是已经备份的,当所有节点都备份成功，Leader会更新水位线。
+
+      ISR:In-sync-replicas,kafka的leader会维护一份处于同步的副本集合，如果在`replica.lag.time.max.ms`时间内系统没有发送fetch请求，
+      或者已然在发送请求，但是在该限定时间内没有赶上Leader的数据就被剔除ISR列表。
+      在Kafka-0.9.0版本剔除`replica.lag.max.messages`消息个数限定，因为这个会导致其他的Broker节点频繁的加入和退出ISR。
+    
+      可以看出0.11版本之前Kafka的副本备份机制的设计存在问题（数据丢失或数据不一致）
+      依赖HW的概念实现数据同步，但是存在数据不一致问题和丢失数据问题，因此Kafka-0.11版本引入了 Leader Epoch解决这个问题，
+      不在使用HW作为数据截断的依据。而是已引入了Leader epoch的概念，任意一个Leader持有一个LeaderEpoch。
+      该LeaderEpoch这是一个由Controller管理的32位数字，存储在Zookeeper的分区状态信息中，并作为LeaderAndIsrRequest的一部分传递给每个新的Leader。
+      Leader接受Producer请求数据上使用LeaderEpoch标记每个Message。然后，该LeaderEpoch编号将通过复制协议传播，并用于替换HW标记，作为消息截断的参考点。
+      
+      
+      改进消息格式，以便每个消息集都带有一个4字节的Leader Epoch号。
+      在每个日志目录中，会创建一个新的Leader Epoch Sequence文件，在其中存储Leader Epoch的序列和在该Epoch中生成的消息的Start Offset。
+      它也缓存在每个副本中，也缓存在内存中。
+
+      follower变成Leader：
+        当Follower成为Leader时，它首先将新的Leader Epoch和副本的LEO添加到Leader Epoch Sequence序列文件的末尾并刷新数据。
+        给Leader产生的每个新消息集都带有新的“Leader Epoch”标记。
+
+      Leader变成Follower：
+        如果需要从本地的Leader Epoch Sequence加载数据，将数据存储在内存中，给相应的分区的Leader发送epoch 请求，
+        该请求包含最新的EpochID,StartOffset信息.Leader接收到信息以后返回该EpochID所对应的LastOffset信息。
+        该信息可能是最新EpochID的StartOffset或者是当前EpochID的Log End Offset信息.
