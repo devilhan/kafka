@@ -1,0 +1,31 @@
+    这是一个监视系统，监视您的kafka群集以及可视的使用者线程，偏移量，所有者等。
+    当您安装Kafka Eagle时，用户可以看到当前的使用者组，对于每个组，他们正在消耗的Topic以及该组在每个主题中的偏移量，滞后，日志大小和位置。
+    这对于了解用户从消息队列消耗的速度以及消息队列增加的速度很有用。
+    
+    [root@tcandyj ~]# tar -zxf kafka-eagle-web-1.4.0-bin.tar.gz -C /usr/
+    [root@tcandyj ~]# mv /usr/kafka-eagle-web-1.4.0 /usr/kafka-eagle
+    [root@tcandyj ~]# vi /etc/profile
+        KE_HOME=/usr/kafka-eagle
+        JAVA_HOME=/usr/java/latest
+        PATH=$PATH:$JAVA_HOME/bin:$KE_HOME/bin
+        CLASSPATH=.
+        export JAVA_HOME
+        export PATH
+        export CLASSPATH
+        export KE_HOME
+    [root@tcandyj ~]# source .bashrc 
+    [root@tcandyj ~]# cd /usr/kafka-eagle/
+    [root@tcandyj kafka-eagle]# vi conf/system-config.properties 
+
+        kafka.eagle.zk.cluster.alias=cluster1
+        cluster1.zk.list=tcandyj.top:2181
+        cluster1.kafka.eagle.offset.storage=kafka
+        kafka.eagle.metrics.charts=true
+        kafka.eagle.driver=com.mysql.jdbc.Driver
+        kafka.eagle.url=jdbc:mysql://192.168.52.1:3306/ke?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+        kafka.eagle.username=root
+        kafka.eagle.password=root
+
+[root@tcandyj kafka-eagle]# chmod u+x bin/ke.sh
+[root@tcandyj kafka-eagle]# ./bin/ke.sh start
+
