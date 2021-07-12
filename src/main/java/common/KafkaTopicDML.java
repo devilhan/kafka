@@ -23,7 +23,7 @@ public class KafkaTopicDML {
         KafkaAdminClient adminClient = (KafkaAdminClient) KafkaAdminClient.create(props);
 
         //创建Topic
-        CreateTopicsResult createTopics = adminClient.createTopics(Arrays.asList(new NewTopic("topic02", 1, (short) 1)));
+        CreateTopicsResult createTopics = adminClient.createTopics(Arrays.asList(new NewTopic("topic03", 1, (short) 1)));
         createTopics.all().get();  //同步创建
 
         //查看Topic列表
